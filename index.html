@@ -1,6 +1,23 @@
  <!DOCTYPE html>
 <html lang="de">
 <head>
+ <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-analytics.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyDnkjHyUhY08AsSRiewelNpXRP_Yt8v9PA",
+    authDomain: "plant-your-food.firebaseapp.com",
+    projectId: "plant-your-food",
+    storageBucket: "plant-your-food.appspot.com",
+    messagingSenderId: "48933998552",
+    appId: "1:48933998552:web:acbfa21dc27fd933536cad",
+    measurementId: "G-518PZGCWL0"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+</script>
   <meta charset="UTF-8" />
   <title>Mein digitaler Acker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -82,6 +99,14 @@
 <body>
 
 <div class="landing" id="landingPage">
+ <div id="authSection">
+  <h2>Login oder Registrieren</h2>
+  <input type="email" id="email" placeholder="E-Mail" />
+  <input type="password" id="password" placeholder="Passwort" />
+  <button onclick="register()">Registrieren</button>
+  <button onclick="login()">Login</button>
+  <p id="authMessage"></p>
+</div>
   <h1>Willkommen auf deinem digitalen Acker!</h1>
   <p>Pflanze Gemüse, beobachte das Wachstum und gestalte deinen virtuellen Garten – ganz einfach, spielerisch und verbunden mit der Natur.</p>
   <button class="start-btn" onclick="startGarden()">Jetzt loslegen</button>
@@ -466,6 +491,41 @@
   // Optional: Originalinhalt des Ackers zwischenspeichern, wenn du den später automatisch laden willst
   const originalAckerHTML = document.getElementById('ackerContent').innerHTML;
 </script>
+<script>
+  const auth = firebase.auth();
 
+  function register() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    auth.createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        document.getElementById("authMessage").innerText = "Registrierung erfolgreich!";
+        showGarden();
+      })
+      .catch((error) => {
+        document.getElementById("authMessage").innerText = error.message;
+      });
+  }
+
+  function login() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        document.getElementById("authMessage").innerText = "Login erfolgreich!";
+        showGarden();
+      })
+      .catch((error) => {
+        document.getElementById("authMessage").innerText = error.message;
+      });
+  }
+
+  function showGarden() {
+    document.getElementById("authSection").style.display = "none";
+    document.getElementById("landingPage").style.display = "flex";
+  }
+</script>
 </body>
 </html>
