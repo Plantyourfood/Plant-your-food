@@ -523,5 +523,48 @@
     }
   });
 </script>
+ <script>
+  const auth = firebase.auth();
+
+  function toggleDropdown() {
+    const menu = document.getElementById("dropdownMenu");
+    menu.style.display = menu.style.display === "none" ? "block" : "none";
+  }
+
+  function showLogin() {
+    alert("Login-Fenster öffnen oder zur Login-Seite weiterleiten");
+    // Hier kannst du später z. B. ein Login-Feld anzeigen
+  }
+
+  function showRegister() {
+    alert("Registrieren-Fenster öffnen oder zur Registrier-Seite weiterleiten");
+  }
+
+  function goToAbo() {
+    alert("Zur Abo-Seite weiterleiten");
+  }
+
+  function goToAcker() {
+    startGarden(); // oder du leitest auf eine eigene Seite weiter
+  }
+
+  function logout() {
+    auth.signOut().then(() => {
+      document.getElementById("loggedOutMenu").style.display = "block";
+      document.getElementById("loggedInMenu").style.display = "none";
+      alert("Erfolgreich ausgeloggt");
+    });
+  }
+
+  auth.onAuthStateChanged((user) => {
+    if (user) {
+      document.getElementById("loggedOutMenu").style.display = "none";
+      document.getElementById("loggedInMenu").style.display = "block";
+    } else {
+      document.getElementById("loggedOutMenu").style.display = "block";
+      document.getElementById("loggedInMenu").style.display = "none";
+    }
+  });
+</script>
 </body>
 </html>
