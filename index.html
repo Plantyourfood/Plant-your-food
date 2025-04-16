@@ -195,8 +195,8 @@
       const rect = canvas.getBoundingClientRect();
       const xClick = e.clientX - rect.left;
       const yClick = e.clientY - rect.top;
-      const x = Math.round(xClick / cellSize);
-      const y = Math.round(yClick / cellSize);
+      const x = Math.floor(xClick / cellSize);
+const y = Math.floor(yClick / cellSize);
 
       for (let i = plants.length - 1; i >= 0; i--) {
         const p = plants[i];
