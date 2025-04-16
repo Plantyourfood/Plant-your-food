@@ -65,8 +65,10 @@
     }
 
     canvas {
-      width: 500px !important;
-      height: 500px !important;
+      width: 500px;
+      height: 500px;
+      max-width: 100vw;
+      max-height: 100vw;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       background-color: #8B4513;
@@ -101,6 +103,10 @@
     }
 
     @media (max-width: 600px) {
+      canvas {
+        width: 300px;
+        height: 300px;
+      }
       #mainArea {
         flex-direction: column;
         align-items: center;
@@ -149,228 +155,228 @@
     <button onclick="confirmRemove(true)">Ja</button>
     <button onclick="confirmRemove(false)">Nein</button>
   </div>
-
   <div id="infoBox" class="popup">
     <div id="infoContent"></div>
     <button onclick="document.getElementById('infoBox').style.display='none'">Schließen</button>
   </div>
-    <script>
-    const canvas = document.getElementById("fieldCanvas");
-    const ctx = canvas.getContext("2d");
-    const cellSize = canvas.width / 10;
-    const gridCount = 10;
-    const plants = [];
-    let occupied = Array.from({ length: gridCount }, () => Array(gridCount).fill(null));
-    let selectedType = null;
-    let selectedPlantIndex = null;
 
-    const backgroundImage = new Image();
-    backgroundImage.src = "https://www.dropbox.com/scl/fi/ebjtylphw7r05u5imaw7n/Foto-31.03.25-17-51-43.png?rlkey=hyty37buet7j76vphyzlkat3l&raw=1";
+<script>
+  const canvas = document.getElementById("fieldCanvas");
+  const ctx = canvas.getContext("2d");
+  const gridCount = 10;
+  const cellSize = canvas.width / gridCount;
+  const plants = [];
+  let occupied = Array.from({ length: gridCount }, () => Array(gridCount).fill(null));
+  let selectedType = null;
+  let selectedPlantIndex = null;
 
-    const placementIcon = new Image();
-    placementIcon.src = "https://www.dropbox.com/scl/fi/fcw0almie7ezv9c8x4laa/Foto-02.04.25-21-04-49.png?rlkey=gurm5g7z8tkxg11cunx3ndl2a&raw=1";
+  const backgroundImage = new Image();
+  backgroundImage.src = "https://www.dropbox.com/scl/fi/ebjtylphw7r05u5imaw7n/Foto-31.03.25-17-51-43.png?rlkey=hyty37buet7j76vphyzlkat3l&raw=1";
 
-    const images = {
-      tomato: new Image(),
-      lettuce: new Image(),
-      carrot: new Image()
-    };
+  const placementIcon = new Image();
+  placementIcon.src = "https://www.dropbox.com/scl/fi/fcw0almie7ezv9c8x4laa/Foto-02.04.25-21-04-49.png?rlkey=gurm5g7z8tkxg11cunx3ndl2a&raw=1";
 
-    images.tomato.src = document.querySelector('[data-type="tomato"]').src;
-    images.lettuce.src = document.querySelector('[data-type="lettuce"]').src;
-    images.carrot.src = document.querySelector('[data-type="carrot"]').src;
+  const images = {
+    tomato: new Image(),
+    lettuce: new Image(),
+    carrot: new Image()
+  };
 
-    const sizeMap = { tomato: 6, lettuce: 3, carrot: 1 };
+  images.tomato.src = document.querySelector('[data-type="tomato"]').src;
+  images.lettuce.src = document.querySelector('[data-type="lettuce"]').src;
+  images.carrot.src = document.querySelector('[data-type="carrot"]').src;
 
-    function selectPlant(img) {
-      document.querySelectorAll("#sidebar img").forEach(i => i.classList.remove("selected"));
-      img.classList.add("selected");
-      selectedType = img.dataset.type;
-    }
+  const sizeMap = { tomato: 6, lettuce: 3, carrot: 1 };
 
-    canvas.addEventListener("click", (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const xClick = e.clientX - rect.left;
-      const yClick = e.clientY - rect.top;
+  function selectPlant(img) {
+    document.querySelectorAll("#sidebar img").forEach(i => i.classList.remove("selected"));
+    img.classList.add("selected");
+    selectedType = img.dataset.type;
+  }
 
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
+  canvas.addEventListener("click", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const xClick = e.clientX - rect.left;
+    const yClick = e.clientY - rect.top;
 
-      const x = Math.floor(xClick * scaleX / cellSize);
-      const y = Math.floor(yClick * scaleY / cellSize);
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
 
-      for (let i = plants.length - 1; i >= 0; i--) {
-        const p = plants[i];
-        if (x >= p.x && x < p.x + p.size && y >= p.y && y < p.y + p.size) {
-          selectedPlantIndex = i;
-          document.getElementById("confirmBox").style.display = "block";
-          return;
-        }
-      }
+    const x = Math.floor(xClick * scaleX / cellSize);
+    const y = Math.floor(yClick * scaleY / cellSize);
 
-      if (!selectedType) return;
-      const s = sizeMap[selectedType];
-      if (x + s > gridCount || y + s > gridCount) return;
-      for (let dx = 0; dx < s; dx++) {
-        for (let dy = 0; dy < s; dy++) {
-          if (occupied[x + dx][y + dy]) return;
-        }
-      }
-
-      for (let dx = 0; dx < s; dx++) {
-        for (let dy = 0; dy < s; dy++) {
-          occupied[x + dx][y + dy] = selectedType;
-        }
-      }
-
-      plants.push({ type: selectedType, x, y, size: s, placedAt: performance.now() });
-    });
-
-    function drawGrid() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (backgroundImage.complete && backgroundImage.naturalWidth > 0) {
-        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
-      } else {
-        ctx.fillStyle = "#8B4513";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-      ctx.strokeStyle = "#b2c49b";
-      for (let i = 0; i <= gridCount; i++) {
-        ctx.beginPath();
-        ctx.moveTo(i * cellSize, 0);
-        ctx.lineTo(i * cellSize, canvas.height);
-        ctx.moveTo(0, i * cellSize);
-        ctx.lineTo(canvas.width, i * cellSize);
-        ctx.stroke();
+    for (let i = plants.length - 1; i >= 0; i--) {
+      const p = plants[i];
+      if (x >= p.x && x < p.x + p.size && y >= p.y && y < p.y + p.size) {
+        selectedPlantIndex = i;
+        document.getElementById("confirmBox").style.display = "block";
+        return;
       }
     }
 
-    function drawAvailableZones() {
-      if (!selectedType) return;
-      const s = sizeMap[selectedType];
-      const used = new Set();
+    if (!selectedType) return;
+    const s = sizeMap[selectedType];
+    if (x + s > gridCount || y + s > gridCount) return;
+    for (let dx = 0; dx < s; dx++) {
+      for (let dy = 0; dy < s; dy++) {
+        if (occupied[x + dx][y + dy]) return;
+      }
+    }
 
-      for (let x = 0; x <= gridCount - s; x++) {
-        for (let y = 0; y <= gridCount - s; y++) {
-          let fits = true;
+    for (let dx = 0; dx < s; dx++) {
+      for (let dy = 0; dy < s; dy++) {
+        occupied[x + dx][y + dy] = selectedType;
+      }
+    }
+
+    plants.push({ type: selectedType, x, y, size: s, placedAt: performance.now() });
+  });
+
+  function drawGrid() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (backgroundImage.complete && backgroundImage.naturalWidth > 0) {
+      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+    } else {
+      ctx.fillStyle = "#8B4513";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    ctx.strokeStyle = "#b2c49b";
+    for (let i = 0; i <= gridCount; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * cellSize, 0);
+      ctx.lineTo(i * cellSize, canvas.height);
+      ctx.moveTo(0, i * cellSize);
+      ctx.lineTo(canvas.width, i * cellSize);
+      ctx.stroke();
+    }
+  }
+
+  function drawAvailableZones() {
+    if (!selectedType) return;
+    const s = sizeMap[selectedType];
+    const used = new Set();
+
+    for (let x = 0; x <= gridCount - s; x++) {
+      for (let y = 0; y <= gridCount - s; y++) {
+        let fits = true;
+        for (let dx = 0; dx < s; dx++) {
+          for (let dy = 0; dy < s; dy++) {
+            if (occupied[x + dx][y + dy]) fits = false;
+          }
+        }
+        if (fits) {
           for (let dx = 0; dx < s; dx++) {
             for (let dy = 0; dy < s; dy++) {
-              if (occupied[x + dx][y + dy]) fits = false;
-            }
-          }
-          if (fits) {
-            for (let dx = 0; dx < s; dx++) {
-              for (let dy = 0; dy < s; dy++) {
-                const key = `${x + dx}_${y + dy}`;
-                if (!used.has(key)) {
-                  used.add(key);
-                  ctx.fillStyle = "rgba(144,238,144,0.2)";
-                  ctx.fillRect((x + dx) * cellSize, (y + dy) * cellSize, cellSize, cellSize);
-                }
+              const key = `${x + dx}_${y + dy}`;
+              if (!used.has(key)) {
+                used.add(key);
+                ctx.fillStyle = "rgba(144,238,144,0.2)";
+                ctx.fillRect((x + dx) * cellSize, (y + dy) * cellSize, cellSize, cellSize);
               }
             }
-            ctx.strokeStyle = "limegreen";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x * cellSize, y * cellSize, s * cellSize, s * cellSize);
-            if (placementIcon.complete) {
-              ctx.drawImage(placementIcon, x * cellSize + 12, y * cellSize + 12, 26, 26);
-            }
+          }
+          ctx.strokeStyle = "limegreen";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(x * cellSize, y * cellSize, s * cellSize, s * cellSize);
+          if (placementIcon.complete) {
+            ctx.drawImage(placementIcon, x * cellSize + 12, y * cellSize + 12, 26, 26);
           }
         }
       }
     }
+  }
 
-    function drawAll() {
-      drawGrid();
-      drawAvailableZones();
-      const now = performance.now();
-      const durations = { tomato: 3000, lettuce: 2000, carrot: 1000 };
+  function drawAll() {
+    drawGrid();
+    drawAvailableZones();
+    const now = performance.now();
+    const durations = { tomato: 3000, lettuce: 2000, carrot: 1000 };
 
-      plants.forEach(p => {
-        const elapsed = now - p.placedAt;
-        const duration = durations[p.type];
-        const progress = Math.min(elapsed / duration, 1);
-        const drawSize = p.size * cellSize * progress;
-        const offset = (p.size * cellSize - drawSize) / 2;
+    plants.forEach(p => {
+      const elapsed = now - p.placedAt;
+      const duration = durations[p.type];
+      const progress = Math.min(elapsed / duration, 1);
+      const drawSize = p.size * cellSize * progress;
+      const offset = (p.size * cellSize - drawSize) / 2;
 
-        ctx.drawImage(images[p.type], p.x * cellSize + offset, p.y * cellSize + offset, drawSize, drawSize);
-        ctx.strokeStyle = "yellow";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(p.x * cellSize, p.y * cellSize, p.size * cellSize, p.size * cellSize);
-      });
+      ctx.drawImage(images[p.type], p.x * cellSize + offset, p.y * cellSize + offset, drawSize, drawSize);
+      ctx.strokeStyle = "yellow";
+      ctx.lineWidth = 2;
+      ctx.strokeRect(p.x * cellSize, p.y * cellSize, p.size * cellSize, p.size * cellSize);
+    });
 
-      updateCounters();
-    }
+    updateCounters();
+  }
 
-    function updateCounters() {
-      const count = { tomato: 0, lettuce: 0, carrot: 0 };
-      plants.forEach(p => count[p.type]++);
-      document.getElementById("count-tomato").textContent = `Tomaten: ${count.tomato}`;
-      document.getElementById("count-lettuce").textContent = `Salate: ${count.lettuce}`;
-      document.getElementById("count-carrot").textContent = `Karotten: ${count.carrot}`;
-    }
+  function updateCounters() {
+    const count = { tomato: 0, lettuce: 0, carrot: 0 };
+    plants.forEach(p => count[p.type]++);
+    document.getElementById("count-tomato").textContent = `Tomaten: ${count.tomato}`;
+    document.getElementById("count-lettuce").textContent = `Salate: ${count.lettuce}`;
+    document.getElementById("count-carrot").textContent = `Karotten: ${count.carrot}`;
+  }
 
-    function confirmRemove(confirm) {
-      document.getElementById("confirmBox").style.display = "none";
-      if (confirm && selectedPlantIndex !== null) {
-        const p = plants[selectedPlantIndex];
-        for (let dx = 0; dx < p.size; dx++) {
-          for (let dy = 0; dy < p.size; dy++) {
-            occupied[p.x + dx][p.y + dy] = null;
-          }
+  function confirmRemove(confirm) {
+    document.getElementById("confirmBox").style.display = "none";
+    if (confirm && selectedPlantIndex !== null) {
+      const p = plants[selectedPlantIndex];
+      for (let dx = 0; dx < p.size; dx++) {
+        for (let dy = 0; dy < p.size; dy++) {
+          occupied[p.x + dx][p.y + dy] = null;
         }
-        plants.splice(selectedPlantIndex, 1);
-        selectedPlantIndex = null;
       }
+      plants.splice(selectedPlantIndex, 1);
+      selectedPlantIndex = null;
     }
+  }
 
-    function showInfo(type) {
-      const infoBox = document.getElementById("infoBox");
-      const content = document.getElementById("infoContent");
-      const info = {
-        tomato: {
-          name: "Tomate",
-          sowing: "März – April",
-          duration: "ca. 120 Tage",
-          harvest: "Juli – August",
-          space: "60 cm",
-          desc: "Sonnengereift, saftig und voller Aroma – unsere Tomaten sind ein Highlight in jedem Garten."
-        },
-        lettuce: {
-          name: "Salat",
-          sowing: "März – Juli",
-          duration: "ca. 60 Tage",
-          harvest: "Mai – September",
-          space: "30 cm",
-          desc: "Frisch, knackig und voller Vitamine – Salat ist ein echter Allrounder."
-        },
-        carrot: {
-          name: "Karotte",
-          sowing: "März – Juni",
-          duration: "ca. 80–100 Tage",
-          harvest: "Juni – Oktober",
-          space: "10 cm",
-          desc: "Knackig, süß und gesund – Karotten gehören in jeden Garten."
-        }
-      };
+  function showInfo(type) {
+    const infoBox = document.getElementById("infoBox");
+    const content = document.getElementById("infoContent");
+    const info = {
+      tomato: {
+        name: "Tomate",
+        sowing: "März – April",
+        duration: "ca. 120 Tage",
+        harvest: "Juli – August",
+        space: "60 cm",
+        desc: "Sonnengereift, saftig und voller Aroma – unsere Tomaten sind ein Highlight in jedem Garten."
+      },
+      lettuce: {
+        name: "Salat",
+        sowing: "März – Juli",
+        duration: "ca. 60 Tage",
+        harvest: "Mai – September",
+        space: "30 cm",
+        desc: "Frisch, knackig und voller Vitamine – Salat ist ein echter Allrounder."
+      },
+      carrot: {
+        name: "Karotte",
+        sowing: "März – Juni",
+        duration: "ca. 80–100 Tage",
+        harvest: "Juni – Oktober",
+        space: "10 cm",
+        desc: "Knackig, süß und gesund – Karotten gehören in jeden Garten."
+      }
+    };
 
-      const d = info[type];
-      content.innerHTML = `
-        <strong>${d.name}</strong><br>
-        <b>Aussaat:</b> ${d.sowing}<br>
-        <b>Wachstumsdauer:</b> ${d.duration}<br>
-        <b>Ernte:</b> ${d.harvest}<br>
-        <b>Platzbedarf:</b> ${d.space}<br><br>${d.desc}
-      `;
-      infoBox.style.display = "block";
-    }
+    const d = info[type];
+    content.innerHTML = `
+      <strong>${d.name}</strong><br>
+      <b>Aussaat:</b> ${d.sowing}<br>
+      <b>Wachstumsdauer:</b> ${d.duration}<br>
+      <b>Ernte:</b> ${d.harvest}<br>
+      <b>Platzbedarf:</b> ${d.space}<br><br>${d.desc}
+    `;
+    infoBox.style.display = "block";
+  }
 
-    function animate() {
-      drawAll();
-      requestAnimationFrame(animate);
-    }
+  function animate() {
+    drawAll();
+    requestAnimationFrame(animate);
+  }
 
-    backgroundImage.onload = animate;
-  </script>
+  backgroundImage.onload = animate;
+</script>
 </body>
-</html>
+</html> 
