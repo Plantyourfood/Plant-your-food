@@ -65,10 +65,8 @@
     }
 
     canvas {
-      width: 100vmin;
-      height: 100vmin;
-      max-width: 90vw;
-      max-height: 90vw;
+      width: 500px !important;
+      height: 500px !important;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       background-color: #8B4513;
@@ -146,7 +144,7 @@
       </div>
     </div>
   </div>
-    <div id="confirmBox" class="popup">
+  <div id="confirmBox" class="popup">
     <div>Möchtest du diese Pflanze entfernen?</div>
     <button onclick="confirmRemove(true)">Ja</button>
     <button onclick="confirmRemove(false)">Nein</button>
@@ -156,8 +154,7 @@
     <div id="infoContent"></div>
     <button onclick="document.getElementById('infoBox').style.display='none'">Schließen</button>
   </div>
-
-  <script>
+    <script>
     const canvas = document.getElementById("fieldCanvas");
     const ctx = canvas.getContext("2d");
     const cellSize = canvas.width / 10;
@@ -195,8 +192,12 @@
       const rect = canvas.getBoundingClientRect();
       const xClick = e.clientX - rect.left;
       const yClick = e.clientY - rect.top;
-      const x = Math.floor(xClick / cellSize);
-      const y = Math.floor(yClick / cellSize);
+
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      const x = Math.floor(xClick * scaleX / cellSize);
+      const y = Math.floor(yClick * scaleY / cellSize);
 
       for (let i = plants.length - 1; i >= 0; i--) {
         const p = plants[i];
