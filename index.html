@@ -140,7 +140,7 @@
         <img src="https://www.dropbox.com/scl/fi/pjknze6vj69km3dc1uacs/Foto-31.03.25-16-16-11.png?rlkey=h29p5te6mrd1i8p1p08tc1q5t&raw=1" data-type="lettuce" onclick="selectPlant(this)">
         <button class="info-btn" onclick="showInfo('lettuce')">i</button>
       </div>
-            <div class="plant-option">
+      <div class="plant-option">
         <img src="https://www.dropbox.com/scl/fi/hleuhgxgb8v95voanj692/Foto-31.03.25-17-42-36.png?rlkey=lif87e2n296bgvzvym18u8jqr&raw=1" data-type="carrot" onclick="selectPlant(this)">
         <button class="info-btn" onclick="showInfo('carrot')">i</button>
       </div>
@@ -195,8 +195,9 @@
       const rect = canvas.getBoundingClientRect();
       const xClick = e.clientX - rect.left;
       const yClick = e.clientY - rect.top;
+
       const x = Math.floor(xClick / cellSize);
-const y = Math.floor(yClick / cellSize);
+      const y = Math.floor(yClick / cellSize);
 
       for (let i = plants.length - 1; i >= 0; i--) {
         const p = plants[i];
@@ -227,12 +228,13 @@ const y = Math.floor(yClick / cellSize);
 
     function drawGrid() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      if (backgroundImage.complete && backgroundImage.naturalWidth > 0) {
+      if (backgroundImage.complete) {
         ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
       } else {
         ctx.fillStyle = "#8B4513";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
+
       ctx.strokeStyle = "#b2c49b";
       for (let i = 0; i <= gridCount; i++) {
         ctx.beginPath();
