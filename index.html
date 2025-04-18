@@ -34,17 +34,19 @@
     }
 
     #sidebar {
-      width: 150px;
+      width: auto;
       background-color: #ffffff;
       border-left: 1px solid #cbdac5;
       padding: 16px 8px;
       display: flex;
-      flex-direction: column;
-      align-items: center;
+      flex-wrap: wrap;
       gap: 16px;
+      align-content: flex-start;
+      height: 100%;
     }
 
     .plant-option {
+      width: 100px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -62,6 +64,16 @@
     .plant-option img.selected {
       border-color: #63a65b;
       box-shadow: 0 0 8px rgba(99, 166, 91, 0.3);
+    }
+
+    .info-btn {
+      margin-top: 4px;
+      background-color: #63a65b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
     }
 
     canvas {
@@ -120,18 +132,17 @@
         border-left: none;
         border-top: 1px solid #cbdac5;
       }
-
-      .plant-option {
-        margin: 5px;
-      }
     }
   </style>
 </head>
 <body>
-  <div id="info">
+    <div id="info">
     <span id="count-tomato">Tomaten: 0</span> |
     <span id="count-lettuce">Salate: 0</span> |
-    <span id="count-carrot">Karotten: 0</span>
+    <span id="count-carrot">Karotten: 0</span> |
+    <span id="count-beetroot">Rote Beete: 0</span> |
+    <span id="count-garlic">Knoblauch: 0</span> |
+    <span id="count-chili">Chili: 0</span>
   </div>
   <div id="mainArea">
     <canvas id="fieldCanvas" width="500" height="500"></canvas>
@@ -148,9 +159,21 @@
         <img src="https://www.dropbox.com/scl/fi/hleuhgxgb8v95voanj692/Foto-31.03.25-17-42-36.png?rlkey=lif87e2n296bgvzvym18u8jqr&raw=1" data-type="carrot" onclick="selectPlant(this)">
         <button class="info-btn" onclick="showInfo('carrot')">i</button>
       </div>
+      <div class="plant-option">
+        <img src="https://www.dropbox.com/scl/fi/ix1td13yktjyc2ofzxl1s/Foto-18.04.25-18-29-36.png?rlkey=3s2x7ymrgb920kkpsnyarbwaz&raw=1" data-type="beetroot" onclick="selectPlant(this)">
+        <button class="info-btn" onclick="showInfo('beetroot')">i</button>
+      </div>
+      <div class="plant-option">
+        <img src="https://www.dropbox.com/scl/fi/e3pqlwiarrt64s3fvnlnh/Foto-18.04.25-19-12-36.png?rlkey=zch2y0ndbmb7ul9iytgzpv8cl&raw=1" data-type="garlic" onclick="selectPlant(this)">
+        <button class="info-btn" onclick="showInfo('garlic')">i</button>
+      </div>
+      <div class="plant-option">
+        <img src="https://www.dropbox.com/scl/fi/6xsfh0swkl8z3jhwfnmom/Foto-18.04.25-20-52-51.png?rlkey=yxklcpkoi2pyrgq0wsg7ow6r9&raw=1" data-type="chili" onclick="selectPlant(this)">
+        <button class="info-btn" onclick="showInfo('chili')">i</button>
+      </div>
     </div>
   </div>
-  <div id="confirmBox" class="popup">
+    <div id="confirmBox" class="popup">
     <div>Möchtest du diese Pflanze entfernen?</div>
     <button onclick="confirmRemove(true)">Ja</button>
     <button onclick="confirmRemove(false)">Nein</button>
@@ -179,14 +202,33 @@
   const images = {
     tomato: new Image(),
     lettuce: new Image(),
-    carrot: new Image()
+    carrot: new Image(),
+    beetroot: new Image(),
+    garlic: new Image(),
+    chili: new Image()
   };
 
-  images.tomato.src = document.querySelector('[data-type="tomato"]').src;
-  images.lettuce.src = document.querySelector('[data-type="lettuce"]').src;
-  images.carrot.src = document.querySelector('[data-type="carrot"]').src;
+  for (const type in images) {
+    images[type].src = document.querySelector(`[data-type="${type}"]`).src;
+  }
 
-  const sizeMap = { tomato: 6, lettuce: 3, carrot: 1 };
+  const sizeMap = {
+    tomato: 6,
+    lettuce: 3,
+    carrot: 1,
+    beetroot: 1,
+    garlic: 1,
+    chili: 2
+  };
+
+  const durations = {
+    tomato: 3000,
+    lettuce: 2000,
+    carrot: 1000,
+    beetroot: 1500,
+    garlic: 1200,
+    chili: 1800
+  };
 
   function selectPlant(img) {
     document.querySelectorAll("#sidebar img").forEach(i => i.classList.remove("selected"));
@@ -198,10 +240,8 @@
     const rect = canvas.getBoundingClientRect();
     const xClick = e.clientX - rect.left;
     const yClick = e.clientY - rect.top;
-
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-
     const x = Math.floor(xClick * scaleX / cellSize);
     const y = Math.floor(yClick * scaleY / cellSize);
 
@@ -217,6 +257,7 @@
     if (!selectedType) return;
     const s = sizeMap[selectedType];
     if (x + s > gridCount || y + s > gridCount) return;
+
     for (let dx = 0; dx < s; dx++) {
       for (let dy = 0; dy < s; dy++) {
         if (occupied[x + dx][y + dy]) return;
@@ -234,7 +275,7 @@
 
   function drawGrid() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (backgroundImage.complete && backgroundImage.naturalWidth > 0) {
+    if (backgroundImage.complete) {
       ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
     } else {
       ctx.fillStyle = "#8B4513";
@@ -290,15 +331,12 @@
     drawGrid();
     drawAvailableZones();
     const now = performance.now();
-    const durations = { tomato: 3000, lettuce: 2000, carrot: 1000 };
 
     plants.forEach(p => {
       const elapsed = now - p.placedAt;
-      const duration = durations[p.type];
-      const progress = Math.min(elapsed / duration, 1);
+      const progress = Math.min(elapsed / durations[p.type], 1);
       const drawSize = p.size * cellSize * progress;
       const offset = (p.size * cellSize - drawSize) / 2;
-
       ctx.drawImage(images[p.type], p.x * cellSize + offset, p.y * cellSize + offset, drawSize, drawSize);
       ctx.strokeStyle = "yellow";
       ctx.lineWidth = 2;
@@ -309,11 +347,14 @@
   }
 
   function updateCounters() {
-    const count = { tomato: 0, lettuce: 0, carrot: 0 };
+    const count = { tomato: 0, lettuce: 0, carrot: 0, beetroot: 0, garlic: 0, chili: 0 };
     plants.forEach(p => count[p.type]++);
     document.getElementById("count-tomato").textContent = `Tomaten: ${count.tomato}`;
     document.getElementById("count-lettuce").textContent = `Salate: ${count.lettuce}`;
     document.getElementById("count-carrot").textContent = `Karotten: ${count.carrot}`;
+    document.getElementById("count-beetroot").textContent = `Rote Beete: ${count.beetroot}`;
+    document.getElementById("count-garlic").textContent = `Knoblauch: ${count.garlic}`;
+    document.getElementById("count-chili").textContent = `Chili: ${count.chili}`;
   }
 
   function confirmRemove(confirm) {
@@ -357,6 +398,30 @@
         harvest: "Juni – Oktober",
         space: "10 cm",
         desc: "Knackig, süß und gesund – Karotten gehören in jeden Garten."
+      },
+      beetroot: {
+        name: "Rote Beete",
+        sowing: "April – Juli",
+        duration: "ca. 90 Tage",
+        harvest: "Juli – Oktober",
+        space: "10 cm",
+        desc: "Tiefrote Farbe, voller Geschmack – Rote Beete ist ein Superfood mit Biss."
+      },
+      garlic: {
+        name: "Knoblauch",
+        sowing: "Oktober – November",
+        duration: "ca. 250 Tage",
+        harvest: "Juli",
+        space: "10 cm",
+        desc: "Aromatisch und vielseitig – Knoblauch verleiht jedem Gericht den letzten Schliff."
+      },
+      chili: {
+        name: "Chili",
+        sowing: "Februar – April",
+        duration: "ca. 100–120 Tage",
+        harvest: "Juli – Oktober",
+        space: "20 cm",
+        desc: "Feurig-scharf mit 250.000–300.000 Scoville – Chilis bringen ordentlich Hitze in deine Küche!"
       }
     };
 
@@ -379,4 +444,4 @@
   backgroundImage.onload = animate;
 </script>
 </body>
-</html> 
+</html>
